@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div style="margin-bottom:1.5rem;">
+            <div style="font-size:0.7rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.75rem; padding-left:14px;">
+                Main Menu
+            </div>
+            <a href="{{ url_for('dashboard.index') }}" class="sidebar-link {{ 'active' if request.endpoint == 'dashboard.index' }}">
+                <span class="icon">🏠</span> Dashboard
+            </a>
+            <a href="{{ url_for('payment.create') }}" class="sidebar-link {{ 'active' if request.endpoint == 'payment.create' }}">
+                <span class="icon">➕</span> New Payment
+            </a>
+            <a href="{{ url_for('payment.history') }}" class="sidebar-link {{ 'active' if request.endpoint == 'payment.history' }}">
+                <span class="icon">📋</span> Payment History
+            </a>
+            <a href="{{ url_for('payment.simulate_webhook') }}" class="sidebar-link">
+                <span class="icon">🧪</span> Dev Simulator
+            </a>
+        </div>
+
+        <hr class="divider">
+
+        <div style="padding: 1rem 14px 0;">
+            <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:4px;">Logged in as</div>
+            <div style="font-weight:600; font-size:0.9rem; color:var(--text-primary);">{{ current_user.owner_name }}</div>
+            <div style="font-size:0.8rem; color:var(--text-muted);">{{ current_user.business_name }}</div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Header -->
+        <div style="margin-bottom:2rem;">
+            <h1 style="font-size:1.6rem; font-weight:800; margin-bottom:4px;">
+                Good {{ 'morning' if now.hour < 12 else ('afternoon' if now.hour < 18 else 'evening') }}, {{ current_user.owner_name.split()[0] }}! 👋
+            </h1>
+            <p style="color:var(--text-secondary); font-size:0.9rem;">
+                Here's your payment overview for today.
+                <span class="pulse-dot" style="margin-left:6px;"></span>
+                <span style="font-size:0.8rem; color:var(--text-muted);">Live</span>
+            </p>
+        </div>
+
+        <!-- Stat Cards -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; margin-bottom:2rem;">
+
+            <div class="glass-card stat-card revenue">
+                <div class="stat-icon">💰</div>
+                <div class="stat-label">Today's Revenue</div>
+                <div class="stat-value text-accent">{{ today_revenue }}</div>
+            </div>
+
+            <div class="glass-card stat-card transactions">
+                <div class="stat-icon">🔄</div>
+                <div class="stat-label">Today's Transactions</div>
+                <div class="stat-value text-primary-color">{{ today_tx_count }}</div>
+            </div>
+
+            <div class="glass-card stat-card pending">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-label">Pending</div>
+                <div class="stat-value" style="color:var(--warning);">{{ pending_count }}</div>
+            </div>
+
+            <div class="glass-card stat-card verified">
+                <div class="stat-icon">✅</div>
+                <div class="stat-label">Verified Payments</div>
+                <div class="stat-value text-success">{{ verified_count }}</div>
+            </div>
+
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:2rem;">
+            <a href="{{ url_for('payment.create') }}" class="btn-primary">➕ Create Payment</a>
+            <a href="{{ url_for('payment.history') }}" class="btn-ghost">📋 Payment History</a>
+            <a href="{{ url_for('payment.simulate_webhook') }}" class="btn-ghost">🧪 Simulate Payment</a>
+        </div>
+
+        <!-- Two columns: Recent Transactions + Audit Log -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem;">
+
+            <!-- Recent Transactions -->
+            <div class="glass-card" style="padding:1.5rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+                    <h2 style="font-size:1rem; font-weight:700;">Recent Transactions</h2>
+                    <a href="{{ url_for('payment.history') }}" style="font-size:0.8rem; color:var(--primary-light); text-decoration:none;">View all →</a>
+                </div>
+
+                {% if recent_payments %}
+                    {% for p in recent_payments %}
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--card-border);">
+                        <div>
+                            <div style="font-size:0.85rem; font-weight:600; color:var(--text-primary);">{{ p.customer_name or 'Unknown' }}</div>
+                            <div style="font-size:0.75rem; color:var(--text-muted); font-family:monospace;">{{ p.payment_reference[-12:] }}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:0.9rem; font-weight:700;">{{ format_currency(p.amount) }}</div>
+                            <span class="badge {{ 'badge-success' if p.status == 'PAID' else ('badge-warning' if p.status == 'PENDING' else 'badge-danger') }}">
+                                {{ p.status }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="text-align:center; padding:2rem; color:var(--text-muted);">
+                        <div style="font-size:2rem; margin-bottom:0.5rem;">📭</div>
+                        No transactions yet.<br>
+                        <a href="{{ url_for('payment.create') }}" class="text-primary-color">Create your first payment →</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Audit Log -->
+            <div class="glass-card" style="padding:1.5rem;">
+                <div style="margin-bottom:1.25rem;">
+                    <h2 style="font-size:1rem; font-weight:700;">Live Audit Trail</h2>
+                </div>
+
+                {% if recent_logs %}
+                    <div class="timeline">
+                        {% for log in recent_logs %}
+                        <div class="timeline-item">
+                            <div class="timeline-time">{{ log.timestamp.strftime('%H:%M:%S') }}</div>
+                            <div class="timeline-action">{{ log.action }}</div>
+                            {% if log.performed_by and log.performed_by != 'system' and log.performed_by != 'monnify_webhook' %}
+                            <div style="font-size:0.75rem; color:var(--text-muted);">by {{ log.performed_by }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div style="text-align:center; padding:2rem; color:var(--text-muted);">
+                        <div style="font-size:2rem; margin-bottom:0.5rem;">📜</div>
+                        Audit logs will appear here.
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Auto-refresh stats every 30 seconds
+setTimeout(() => window.location.reload(), 30000);
+</script>
+{% endblock %}

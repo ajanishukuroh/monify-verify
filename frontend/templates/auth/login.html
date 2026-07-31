@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div style="min-height:calc(100vh - 120px); display:flex; align-items:center; justify-content:center; padding:2rem;">
+    <div class="glass-card" style="width:100%; max-width:440px; padding:2.5rem;">
+
+        <!-- Header -->
+        <div style="text-align:center; margin-bottom:2rem;">
+            <div style="font-size:2.5rem; margin-bottom:0.75rem;">✅</div>
+            <h1 style="font-size:1.6rem; font-weight:800; margin-bottom:0.4rem;">Welcome Back</h1>
+            <p style="color:var(--text-secondary); font-size:0.9rem;">Log in to your merchant dashboard</p>
+        </div>
+
+        <!-- Form -->
+        <form method="POST" action="{{ url_for('auth.login') }}" id="login-form">
+
+            <div class="form-group">
+                <label class="form-label" for="email">Email Address</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    class="form-input"
+                    placeholder="you@yourbusiness.com"
+                    required
+                    autocomplete="email"
+                >
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <div style="position:relative;">
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="form-input"
+                        placeholder="Enter your password"
+                        required
+                        autocomplete="current-password"
+                        style="padding-right:48px;"
+                    >
+                    <button type="button" onclick="togglePassword('password', this)"
+                        style="position:absolute; right:14px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:1rem;">
+                        👁
+                    </button>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.875rem; color:var(--text-secondary);">
+                    <input type="checkbox" name="remember" style="accent-color:var(--primary);">
+                    Remember me
+                </label>
+            </div>
+
+            <button type="submit" class="btn-primary" style="width:100%; justify-content:center; padding:13px;" id="login-btn">
+                <span id="login-btn-text">Sign In →</span>
+                <span id="login-spinner" class="spinner" style="display:none;"></span>
+            </button>
+        </form>
+
+        <hr class="divider">
+
+        <p style="text-align:center; color:var(--text-secondary); font-size:0.9rem;">
+            Don't have an account?
+            <a href="{{ url_for('auth.register') }}" class="text-primary-color" style="font-weight:600; text-decoration:none;">
+                Register your business →
+            </a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function togglePassword(id, btn) {
+    const input = document.getElementById(id);
+    if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🙈';
+    } else {
+        input.type = 'password';
+        btn.textContent = '👁';
+    }
+}
+
+document.getElementById('login-form').addEventListener('submit', function() {
+    document.getElementById('login-btn-text').style.display = 'none';
+    document.getElementById('login-spinner').style.display = 'inline-block';
+});
+</script>
+{% endblock %}

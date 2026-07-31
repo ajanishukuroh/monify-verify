@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}Monify Verify — Real-time payment verification for Nigerian merchants. Built on the Monnify Payment Gateway.{% endblock %}">
+    <title>{% block title %}Monify Verify{% endblock %} | Verify Before You Deliver</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6C47FF',
+                        accent: '#00D4AA',
+                        surface: '#1A1A2E',
+                        'bg-dark': '#0D0D1A',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✅</text></svg>">
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar">
+    <a href="{{ url_for('dashboard.index') if current_user.is_authenticated else url_for('landing') }}" class="navbar-brand gradient-text">
+        ✅ Monify Verify
+    </a>
+
+    <ul class="navbar-links">
+        {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('dashboard.index') }}" class="{{ 'active' if request.endpoint == 'dashboard.index' }}">🏠 Dashboard</a></li>
+            <li><a href="{{ url_for('payment.create') }}" class="{{ 'active' if request.endpoint == 'payment.create' }}">+ New Payment</a></li>
+            <li><a href="{{ url_for('payment.history') }}" class="{{ 'active' if request.endpoint == 'payment.history' }}">📋 History</a></li>
+            <li><a href="{{ url_for('payment.simulate_webhook') }}" class="{{ 'active' if request.endpoint == 'payment.simulate_webhook' }}">🧪 Dev Sim</a></li>
+            <li>
+                <a href="{{ url_for('auth.logout') }}" class="btn-ghost btn-sm" style="margin-left:8px;">
+                    Logout
+                </a>
+            </li>
+        {% else %}
+            <li><a href="{{ url_for('landing') }}">Home</a></li>
+            <li><a href="{{ url_for('landing') }}#features">Features</a></li>
+            <li><a href="#" onclick="return false;" style="opacity:0.4;cursor:default;">Pricing (Soon)</a></li>
+            <li><a href="{{ url_for('auth.login') }}" class="{{ 'active' if request.endpoint == 'auth.login' }}">Login</a></li>
+            <li><a href="{{ url_for('auth.register') }}" class="btn-primary btn-sm" style="margin-left:8px;">Register</a></li>
+        {% endif %}
+    </ul>
+</nav>
+
+<!-- ===== FLASH MESSAGES ===== -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">
+                    {% if category == 'success' %}✅{% elif category == 'error' %}❌{% elif category == 'warning' %}⚠️{% else %}ℹ️{% endif %}
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<!-- ===== MAIN CONTENT ===== -->
+{% block content %}{% endblock %}
+
+<!-- ===== FOOTER ===== -->
+{% block footer %}
+<footer style="border-top: 1px solid var(--card-border); padding: 2rem 1.5rem; text-align: center; margin-top: 4rem;">
+    <p style="color: var(--text-muted); font-size: 0.85rem;">
+        <span class="gradient-text" style="font-weight: 700;">Monify Verify</span>
+        &nbsp;·&nbsp; Verify Before You Deliver &nbsp;·&nbsp;
+        <span style="opacity: 0.5;">Built on Monnify · Hackathon 2024</span>
+    </p>
+</footer>
+{% endblock %}
+
+<!-- ===== SCRIPTS ===== -->
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block extra_scripts %}{% endblock %}
+
+</body>
+</html>

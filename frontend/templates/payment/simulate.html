@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block title %}Dev: Simulate Webhook{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+    <aside class="sidebar">
+        <a href="{{ url_for('dashboard.index') }}" class="sidebar-link"><span class="icon">🏠</span> Dashboard</a>
+        <a href="{{ url_for('payment.create') }}" class="sidebar-link"><span class="icon">➕</span> New Payment</a>
+        <a href="{{ url_for('payment.history') }}" class="sidebar-link"><span class="icon">📋</span> Payment History</a>
+        <a href="{{ url_for('payment.simulate_webhook') }}" class="sidebar-link active"><span class="icon">🧪</span> Dev Simulator</a>
+    </aside>
+
+    <main class="main-content">
+        <div style="max-width:560px; margin:0 auto;">
+
+            <!-- Header -->
+            <div style="margin-bottom:2rem;">
+                <div class="badge badge-warning" style="margin-bottom:0.75rem;">⚠️ Developer Mode Only</div>
+                <h1 style="font-size:1.6rem; font-weight:800; margin-bottom:4px;">🧪 Webhook Simulator</h1>
+                <p style="color:var(--text-secondary); font-size:0.9rem;">
+                    Simulate a Monnify payment webhook to test the full payment flow locally without ngrok.
+                </p>
+            </div>
+
+            <!-- Info box -->
+            <div style="background:rgba(108,71,255,0.08); border:1px solid rgba(108,71,255,0.2); border-radius:12px; padding:1rem 1.25rem; margin-bottom:1.5rem; font-size:0.875rem; color:var(--text-secondary); line-height:1.7;">
+                <strong style="color:var(--primary-light);">How to test:</strong><br>
+                1. Create a new payment above<br>
+                2. Copy the reference from Payment History<br>
+                3. Paste it here and hit Simulate<br>
+                4. The payment status updates + QR is generated instantly
+            </div>
+
+            <div class="glass-card" style="padding:2rem;">
+                <form method="POST" action="{{ url_for('payment.simulate_webhook') }}" id="sim-form">
+
+                    <div class="form-group">
+                        <label class="form-label" for="reference">Payment Reference</label>
+                        <input type="text" id="reference" name="reference" class="form-input"
+                            placeholder="MNFY-20240101120000-ABCD1234"
+                            value="{{ latest_payment.payment_reference if latest_payment else '' }}"
+                            required>
+                        {% if latest_payment %}
+                        <div style="font-size:0.75rem; color:var(--accent); margin-top:4px;">
+                            ✅ Auto-filled with your latest pending payment
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="status">Simulate Status</label>
+                        <select id="status" name="status" class="form-input" style="cursor:pointer;">
+                            <option value="PAID" selected>✅ PAID — Payment Successful</option>
+                            <option value="FAILED">❌ FAILED — Payment Failed</option>
+                            <option value="CANCELLED">🚫 CANCELLED — Payment Cancelled</option>
+                            <option value="OVERPAID">💚 OVERPAID — Customer Overpaid</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="amount">Simulated Amount Paid (₦)</label>
+                        <input type="number" id="amount" name="amount" class="form-input"
+                            placeholder="100.00" value="{{ latest_payment.amount if latest_payment else '100' }}" min="1" step="0.01">
+                    </div>
+
+                    <button type="submit" class="btn-accent" style="width:100%; justify-content:center; padding:13px;" id="sim-btn">
+                        <span id="sim-text">⚡ Simulate Webhook</span>
+                        <span id="sim-spinner" class="spinner" style="display:none;"></span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- What happens next -->
+            <div class="glass-card" style="padding:1.5rem; margin-top:1.5rem;">
+                <h3 style="font-size:0.9rem; font-weight:700; margin-bottom:0.75rem; color:var(--text-secondary);">What this simulates:</h3>
+                <div class="timeline" style="padding-left:1.5rem;">
+                    <div class="timeline-item">
+                        <div class="timeline-action">Monnify webhook received</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-action">Payment status updated in DB</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-action">QR code generated (if PAID)</div>
+                    </div>
+                    <div class="timeline-item" style="padding-bottom:0;">
+                        <div class="timeline-action">Audit log entries written</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.getElementById('sim-form').addEventListener('submit', function() {
+    document.getElementById('sim-text').style.display = 'none';
+    document.getElementById('sim-spinner').style.display = 'inline-block';
+});
+</script>
+{% endblock %}

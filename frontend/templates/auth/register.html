@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% block title %}Register Your Business{% endblock %}
+
+{% block content %}
+<div style="min-height:calc(100vh - 120px); display:flex; align-items:center; justify-content:center; padding:2rem;">
+    <div class="glass-card" style="width:100%; max-width:500px; padding:2.5rem;">
+
+        <!-- Header -->
+        <div style="text-align:center; margin-bottom:2rem;">
+            <div style="font-size:2.5rem; margin-bottom:0.75rem;">🏢</div>
+            <h1 style="font-size:1.6rem; font-weight:800; margin-bottom:0.4rem;">Create Your Account</h1>
+            <p style="color:var(--text-secondary); font-size:0.9rem;">Start verifying payments in under 2 minutes</p>
+        </div>
+
+        <!-- Form -->
+        <form method="POST" action="{{ url_for('auth.register') }}" id="register-form">
+
+            <div class="form-group">
+                <label class="form-label" for="business_name">Business Name</label>
+                <input
+                    type="text"
+                    id="business_name"
+                    name="business_name"
+                    class="form-input"
+                    placeholder="e.g. TechMart Nigeria"
+                    required
+                    maxlength="150"
+                >
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="owner_name">Your Full Name</label>
+                <input
+                    type="text"
+                    id="owner_name"
+                    name="owner_name"
+                    class="form-input"
+                    placeholder="e.g. Chukwuemeka Okafor"
+                    required
+                    maxlength="150"
+                >
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="email">Email Address</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    class="form-input"
+                    placeholder="you@yourbusiness.com"
+                    required
+                    autocomplete="email"
+                >
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <div style="position:relative;">
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="form-input"
+                        placeholder="Min. 8 characters"
+                        required
+                        minlength="8"
+                        autocomplete="new-password"
+                        style="padding-right:48px;"
+                        oninput="checkStrength(this.value)"
+                    >
+                    <button type="button" onclick="togglePassword('password', this)"
+                        style="position:absolute; right:14px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:1rem;">
+                        👁
+                    </button>
+                </div>
+                <!-- Strength bar -->
+                <div style="height:4px; background:var(--card-border); border-radius:2px; margin-top:8px; overflow:hidden;">
+                    <div id="strength-bar" style="height:100%; width:0%; border-radius:2px; transition:all 0.3s ease;"></div>
+                </div>
+                <div id="strength-label" style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="confirm_password">Confirm Password</label>
+                <input
+                    type="password"
+                    id="confirm_password"
+                    name="confirm_password"
+                    class="form-input"
+                    placeholder="Repeat your password"
+                    required
+                    autocomplete="new-password"
+                >
+            </div>
+
+            <button type="submit" class="btn-primary" style="width:100%; justify-content:center; padding:13px; margin-top:0.5rem;" id="register-btn">
+                <span id="register-btn-text">Create Account →</span>
+                <span id="register-spinner" class="spinner" style="display:none;"></span>
+            </button>
+        </form>
+
+        <hr class="divider">
+
+        <p style="text-align:center; color:var(--text-secondary); font-size:0.9rem;">
+            Already have an account?
+            <a href="{{ url_for('auth.login') }}" class="text-primary-color" style="font-weight:600; text-decoration:none;">
+                Sign in →
+            </a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function togglePassword(id, btn) {
+    const input = document.getElementById(id);
+    if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+    else { input.type = 'password'; btn.textContent = '👁'; }
+}
+
+function checkStrength(pw) {
+    const bar = document.getElementById('strength-bar');
+    const label = document.getElementById('strength-label');
+    let score = 0;
+    if (pw.length >= 8) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+
+    const colors = ['#FF4757', '#F5A623', '#00D4AA', '#6C47FF'];
+    const labels = ['Weak', 'Fair', 'Good', 'Strong 💪'];
+    bar.style.width = (score * 25) + '%';
+    bar.style.background = colors[score - 1] || 'transparent';
+    label.textContent = score > 0 ? labels[score - 1] : '';
+    label.style.color = colors[score - 1] || 'var(--text-muted)';
+}
+
+document.getElementById('register-form').addEventListener('submit', function(e) {
+    const pw = document.getElementById('password').value;
+    const cpw = document.getElementById('confirm_password').value;
+    if (pw !== cpw) {
+        e.preventDefault();
+        alert('Passwords do not match!');
+        return;
+    }
+    document.getElementById('register-btn-text').style.display = 'none';
+    document.getElementById('register-spinner').style.display = 'inline-block';
+});
+</script>
+{% endblock %}

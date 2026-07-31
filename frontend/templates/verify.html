@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Monify Verify — Payment verification page">
+    <title>
+        {% if payment and payment.status == 'PAID' %}✅ Payment Verified
+        {% elif payment %}⏳ Payment Pending
+        {% else %}❓ Payment Not Found
+        {% endif %} | Monify Verify
+    </title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✅</text></svg>">
+
+    <style>
+        body { background: var(--bg); }
+
+        .verify-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .verify-card {
+            width: 100%;
+            max-width: 460px;
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            overflow: hidden;
+        }
+
+        .verify-header {
+            padding: 3rem 2rem 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .verify-header.paid {
+            background: linear-gradient(135deg, rgba(0,212,170,0.15) 0%, rgba(108,71,255,0.10) 100%);
+            border-bottom: 1px solid rgba(0,212,170,0.2);
+        }
+
+        .verify-header.pending {
+            background: linear-gradient(135deg, rgba(245,166,35,0.12) 0%, transparent 100%);
+            border-bottom: 1px solid rgba(245,166,35,0.2);
+        }
+
+        .verify-header.failed {
+            background: linear-gradient(135deg, rgba(255,71,87,0.12) 0%, transparent 100%);
+            border-bottom: 1px solid rgba(255,71,87,0.2);
+        }
+
+        .verify-header.error {
+            background: linear-gradient(135deg, rgba(160,160,192,0.08) 0%, transparent 100%);
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .verify-body { padding: 1.5rem 2rem 2rem; }
+
+        /* Animated checkmark ring */
+        .status-ring {
+            width: 90px; height: 90px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 1.25rem;
+            position: relative;
+        }
+
+        .status-ring.paid {
+            background: rgba(0,212,170,0.12);
+            border: 2px solid rgba(0,212,170,0.4);
+            animation: ringPulse 2s ease-in-out infinite;
+        }
+
+        .status-ring.pending {
+            background: rgba(245,166,35,0.12);
+            border: 2px solid rgba(245,166,35,0.4);
+        }
+
+        .status-ring.failed {
+            background: rgba(255,71,87,0.12);
+            border: 2px solid rgba(255,71,87,0.4);
+        }
+
+        @keyframes ringPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0,212,170,0.3); }
+            50% { box-shadow: 0 0 0 16px rgba(0,212,170,0); }
+        }
+
+        .verify-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            gap: 1rem;
+        }
+
+        .verify-row:last-child { border-bottom: none; }
+
+        .verify-key {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            flex-shrink: 0;
+        }
+
+        .verify-val {
+            color: var(--text-primary);
+            font-size: 0.92rem;
+            font-weight: 600;
+            text-align: right;
+            word-break: break-all;
+        }
+
+        .monnify-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 0 0;
+            margin-top: 1.25rem;
+            border-top: 1px solid var(--card-border);
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .monnify-badge strong { color: var(--accent); }
+    </style>
+</head>
+<body>
+
+<!-- Background mesh -->
+<div style="position:fixed; inset:0; pointer-events:none; z-index:-1;
+    background: radial-gradient(ellipse at 30% 30%, rgba(108,71,255,0.18) 0%, transparent 55%),
+                radial-gradient(ellipse at 75% 75%, rgba(0,212,170,0.12) 0%, transparent 50%);">
+</div>
+
+<div class="verify-container">
+
+    {% if error %}
+    <!-- ===== NOT FOUND ===== -->
+    <div class="verify-card">
+        <div class="verify-header error">
+            <div class="status-ring" style="background:rgba(160,160,192,0.08); border:2px solid var(--card-border);">❓</div>
+            <h1 style="font-size:1.4rem; font-weight:800; margin-bottom:0.5rem;">Payment Not Found</h1>
+            <p style="color:var(--text-secondary); font-size:0.9rem;">{{ error }}</p>
+        </div>
+        <div class="verify-body" style="text-align:center;">
+            <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:1.5rem;">
+                This QR code may be invalid or expired. Contact the merchant for a valid receipt.
+            </p>
+            <a href="{{ url_for('landing') }}" class="btn-ghost btn-sm">← Back to Monify Verify</a>
+        </div>
+    </div>
+
+    {% elif payment.status == 'PAID' %}
+    <!-- ===== PAID / VERIFIED ===== -->
+    <div class="verify-card">
+        <div class="verify-header paid">
+            <div class="status-ring paid">✅</div>
+            <h1 style="font-size:1.6rem; font-weight:900; color:var(--success); margin-bottom:0.4rem;">
+                Payment Verified
+            </h1>
+            <p style="color:var(--text-secondary); font-size:0.9rem;">
+                This payment has been confirmed by Monnify
+            </p>
+        </div>
+
+        <div class="verify-body">
+            <div class="verify-row">
+                <span class="verify-key">Business</span>
+                <span class="verify-val">{{ merchant.business_name if merchant else '—' }}</span>
+            </div>
+            <div class="verify-row">
+                <span class="verify-key">Amount</span>
+                <span class="verify-val" style="color:var(--accent); font-size:1.1rem;">
+                    {{ format_currency(payment.amount) }}
+                </span>
+            </div>
+            <div class="verify-row">
+                <span class="verify-key">Customer</span>
+                <span class="verify-val">{{ payment.customer_name or '—' }}</span>
+            </div>
+            <div class="verify-row">
+                <span class="verify-key">Reference</span>
+                <span class="verify-val" style="font-family:monospace; font-size:0.8rem; color:var(--primary-light);">
+                    {{ payment.payment_reference }}
+                </span>
+            </div>
+            {% if payment.transaction_reference %}
+            <div class="verify-row">
+                <span class="verify-key">Tx Ref</span>
+                <span class="verify-val" style="font-family:monospace; font-size:0.78rem; color:var(--text-muted);">
+                    {{ payment.transaction_reference }}
+                </span>
+            </div>
+            {% endif %}
+            <div class="verify-row">
+                <span class="verify-key">Status</span>
+                <span class="verify-val">
+                    <span class="badge badge-success">✅ PAID & VERIFIED</span>
+                </span>
+            </div>
+            <div class="verify-row">
+                <span class="verify-key">Date</span>
+                <span class="verify-val">{{ format_datetime(payment.created_at) }}</span>
+            </div>
+
+            <div class="monnify-badge">
+                🏦 <strong>Verified via Monnify</strong> · Generated by <strong>Monify Verify</strong>
+            </div>
+        </div>
+    </div>
+
+    {% elif payment.status == 'PENDING' %}
+    <!-- ===== PENDING ===== -->
+    <div class="verify-card">
+        <div class="verify-header pending">
+            <div class="status-ring pending">⏳</div>
+            <h1 style="font-size:1.5rem; font-weight:900; color:var(--warning); margin-bottom:0.4rem;">
+                Payment Pending
+            </h1>
+            <p style="color:var(--text-secondary); font-size:0.9rem;">
+                This payment has not been confirmed yet
+            </p>
+        </div>
+        <div class="verify-body">
+            <div class="verify-row">
+                <span class="verify-key">Business</span>
+                <span class="verify-val">{{ merchant.business_name if merchant else '—' }}</span>
+            </div>
+            <div class="verify-row">
+                <span class="verify-key">Amount</span>
+                <span class="verify-val" style="color:var(--warning);">{{ format_currency(payment.amount) }}</span>
+            </div>
+            <div class="verify-row">
+                <span class="verify-key">Reference</span>
+                <span class="verify-val" style="font-family:monospace; font-size:0.8rem;">{{ payment.payment_reference }}</span>
+            </div>
+            <div class="verify-row">
+                <span class="verify-key">Status</span>
+                <span class="verify-val"><span class="badge badge-warning">⏳ PENDING</span></span>
+            </div>
+            <div style="margin-top:1.25rem; padding:1rem; background:rgba(245,166,35,0.08); border-radius:10px; border:1px solid rgba(245,166,35,0.2); font-size:0.85rem; color:var(--warning); text-align:center;">
+                ⚠️ Do not release goods until this payment shows as <strong>VERIFIED</strong>.
+            </div>
+            <div class="monnify-badge">
+                🏦 <strong>Powered by Monnify</strong> · <strong>Monify Verify</strong>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- ===== FAILED / OTHER ===== -->
+    <div class="verify-card">
+        <div class="verify-header failed">
+            <div class="status-ring failed">❌</div>
+            <h1 style="font-size:1.5rem; font-weight:900; color:var(--danger); margin-bottom:0.4rem;">
+                Payment {{ payment.status }}
+            </h1>
+            <p style="color:var(--text-secondary); font-size:0.9rem;">
+                This payment did not succeed.
+            </p>
+        </div>
+        <div class="verify-body">
+            <div class="verify-row">
+                <span class="verify-key">Reference</span>
+                <span class="verify-val" style="font-family:monospace; font-size:0.8rem;">{{ payment.payment_reference }}</span>
+            </div>
+            <div class="verify-row">
+                <span class="verify-key">Status</span>
+                <span class="verify-val"><span class="badge badge-danger">❌ {{ payment.status }}</span></span>
+            </div>
+            <div style="margin-top:1.25rem; padding:1rem; background:rgba(255,71,87,0.08); border-radius:10px; border:1px solid rgba(255,71,87,0.2); font-size:0.85rem; color:var(--danger); text-align:center;">
+                🚫 This payment is not valid. Contact the merchant.
+            </div>
+            <div class="monnify-badge">
+                🏦 <strong>Powered by Monnify</strong> · <strong>Monify Verify</strong>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Branding footer -->
+    <div style="margin-top:2rem; text-align:center;">
+        <a href="{{ url_for('landing') }}" style="font-size:0.8rem; color:var(--text-muted); text-decoration:none;">
+            <span class="gradient-text" style="font-weight:700;">✅ Monify Verify</span>
+            <span style="opacity:0.5;"> · Verify Before You Deliver</span>
+        </a>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block title %}Monify Verify — Verify Before You Deliver{% endblock %}
+
+{% block content %}
+<!-- ===== HERO ===== -->
+<section class="hero">
+    <div class="hero-badge">
+        <span class="pulse-dot"></span>
+        Built on Monnify · Trusted by Nigerian Merchants
+    </div>
+
+    <h1>
+        <span class="gradient-text">Verify Payments</span><br>
+        Before You Deliver.
+    </h1>
+
+    <p>
+        Stop falling for fake receipts. Monify Verify is a real-time payment verification layer built
+        on the Monnify Gateway — giving merchants instant proof, QR-based receipts,
+        and a tamper-proof audit trail.
+    </p>
+
+    <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+        <a href="{{ url_for('auth.register') }}" class="btn-primary" style="font-size:1rem; padding:14px 32px;">
+            🚀 Get Started Free
+        </a>
+        <a href="#features" class="btn-ghost" style="font-size:1rem; padding:14px 32px;">
+            See How It Works
+        </a>
+    </div>
+</section>
+
+<!-- ===== STATS BAND ===== -->
+<section style="padding: 1rem 1.5rem 3rem; max-width:900px; margin:0 auto;">
+    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:1rem; text-align:center;">
+        <div class="glass-card" style="padding:1.5rem;">
+            <div style="font-size:2rem; font-weight:900;" class="gradient-text">100%</div>
+            <div style="color:var(--text-muted); font-size:0.8rem; margin-top:4px;">Real-time Verification</div>
+        </div>
+        <div class="glass-card" style="padding:1.5rem;">
+            <div style="font-size:2rem; font-weight:900;" class="gradient-text">QR</div>
+            <div style="color:var(--text-muted); font-size:0.8rem; margin-top:4px;">Secure QR Receipts</div>
+        </div>
+        <div class="glass-card" style="padding:1.5rem;">
+            <div style="font-size:2rem; font-weight:900;" class="gradient-text">0₦</div>
+            <div style="color:var(--text-muted); font-size:0.8rem; margin-top:4px;">Free to Start</div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== FEATURES ===== -->
+<section id="features" style="padding: 4rem 1.5rem; max-width:1100px; margin:0 auto;">
+    <div style="text-align:center; margin-bottom:3rem;">
+        <h2 style="font-size:2rem; font-weight:800; margin-bottom:0.75rem;">
+            Everything Merchants Need to <span class="gradient-text">Trust Payments</span>
+        </h2>
+        <p style="color:var(--text-secondary); max-width:500px; margin:0 auto;">
+            No more checking banking apps. No more calling your bank. Just scan, verify, deliver.
+        </p>
+    </div>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1.25rem;">
+
+        <div class="glass-card" style="padding:1.75rem;">
+            <div class="feature-icon">⚡</div>
+            <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:0.5rem;">Real-Time Verification</h3>
+            <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">
+                Connect directly to Monnify's API to verify every payment status in seconds, not minutes.
+            </p>
+        </div>
+
+        <div class="glass-card" style="padding:1.75rem;">
+            <div class="feature-icon">📱</div>
+            <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:0.5rem;">QR Verification Portal</h3>
+            <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">
+                Every verified payment generates a branded QR code. Customers scan to prove they paid — no more disputes.
+            </p>
+        </div>
+
+        <div class="glass-card" style="padding:1.75rem;">
+            <div class="feature-icon">🔐</div>
+            <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:0.5rem;">Tamper-Proof Audit Trail</h3>
+            <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">
+                Every action — initialization, payment, QR generation, verification — is timestamped and logged immutably.
+            </p>
+        </div>
+
+        <div class="glass-card" style="padding:1.75rem;">
+            <div class="feature-icon">📊</div>
+            <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:0.5rem;">Merchant Dashboard</h3>
+            <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">
+                See today's revenue, transaction count, pending and verified payments — all at a glance.
+            </p>
+        </div>
+
+        <div class="glass-card" style="padding:1.75rem;">
+            <div class="feature-icon">🏦</div>
+            <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:0.5rem;">Built on Monnify</h3>
+            <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">
+                We don't replace Monnify — we extend it. Bank transfers, card payments, all supported natively.
+            </p>
+        </div>
+
+        <div class="glass-card" style="padding:1.75rem;">
+            <div class="feature-icon">🛡️</div>
+            <h3 style="font-size:1.05rem; font-weight:700; margin-bottom:0.5rem;">Fraud Prevention</h3>
+            <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.7;">
+                Fake receipts and screenshots are worthless. Every verification request goes directly to Monnify's servers.
+            </p>
+        </div>
+
+    </div>
+</section>
+
+<!-- ===== HOW IT WORKS ===== -->
+<section style="padding: 4rem 1.5rem; max-width:800px; margin:0 auto;">
+    <div style="text-align:center; margin-bottom:3rem;">
+        <h2 style="font-size:2rem; font-weight:800;">
+            How It <span class="gradient-text">Works</span>
+        </h2>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:0;">
+        {% set steps = [
+            ('🧾', 'Merchant Creates Payment', 'Enter customer details and amount in your Monify Verify dashboard.'),
+            ('💳', 'Customer Pays via Monnify', 'Customer pays via bank transfer or card through the Monnify checkout page.'),
+            ('⚡', 'Instant Webhook Update', 'Monnify notifies Monify Verify in real time when payment is confirmed.'),
+            ('📱', 'QR Code Generated', 'A secure, unique QR code is instantly generated for the payment.'),
+            ('✅', 'Merchant Verifies', 'Merchant scans the QR or shows it to the customer. Payment instantly confirmed.')
+        ] %}
+        {% for icon, title, desc in steps %}
+        <div style="display:flex; gap:1.25rem; align-items:flex-start; padding: 1.25rem 0; border-bottom: 1px solid var(--card-border);">
+            <div style="width:44px; height:44px; border-radius:12px; background:rgba(108,71,255,0.12); border:1px solid rgba(108,71,255,0.2); display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0;">{{ icon }}</div>
+            <div>
+                <div style="font-weight:700; margin-bottom:4px;">{{ title }}</div>
+                <div style="color:var(--text-secondary); font-size:0.9rem;">{{ desc }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section style="padding: 4rem 1.5rem 6rem; text-align:center;">
+    <div class="glass-card" style="max-width:600px; margin:0 auto; padding:3rem;">
+        <h2 style="font-size:1.75rem; font-weight:800; margin-bottom:1rem;">
+            Ready to <span class="gradient-text">Verify Before You Deliver?</span>
+        </h2>
+        <p style="color:var(--text-secondary); margin-bottom:2rem; line-height:1.7;">
+            Create your free merchant account in 30 seconds. No credit card required.
+        </p>
+        <a href="{{ url_for('auth.register') }}" class="btn-accent" style="font-size:1rem; padding:14px 36px;">
+            Create Free Account →
+        </a>
+    </div>
+</section>
+{% endblock %}

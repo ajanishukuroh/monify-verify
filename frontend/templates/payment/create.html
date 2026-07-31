@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %}Create Payment{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+    <aside class="sidebar">
+        <a href="{{ url_for('dashboard.index') }}" class="sidebar-link"><span class="icon">🏠</span> Dashboard</a>
+        <a href="{{ url_for('payment.create') }}" class="sidebar-link active"><span class="icon">➕</span> New Payment</a>
+        <a href="{{ url_for('payment.history') }}" class="sidebar-link"><span class="icon">📋</span> Payment History</a>
+        <a href="{{ url_for('payment.simulate_webhook') }}" class="sidebar-link"><span class="icon">🧪</span> Dev Simulator</a>
+    </aside>
+
+    <main class="main-content">
+        <div style="max-width:560px; margin:0 auto;">
+
+            <!-- Header -->
+            <div style="margin-bottom:2rem;">
+                <a href="{{ url_for('dashboard.index') }}" style="color:var(--text-muted); text-decoration:none; font-size:0.85rem;">← Back to Dashboard</a>
+                <h1 style="font-size:1.6rem; font-weight:800; margin-top:0.75rem;">Create New Payment</h1>
+                <p style="color:var(--text-secondary); font-size:0.9rem;">A Monnify checkout link will be generated for your customer.</p>
+            </div>
+
+            <!-- Form Card -->
+            <div class="glass-card" style="padding:2rem;">
+                <form method="POST" action="{{ url_for('payment.create') }}" id="payment-form">
+
+                    <div class="form-group">
+                        <label class="form-label" for="customer_name">Customer Full Name</label>
+                        <input type="text" id="customer_name" name="customer_name" class="form-input"
+                            placeholder="e.g. Amaka Johnson" required maxlength="150">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="customer_email">Customer Email</label>
+                        <input type="email" id="customer_email" name="customer_email" class="form-input"
+                            placeholder="customer@email.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="amount">Amount (₦)</label>
+                        <div style="position:relative;">
+                            <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-weight:600; font-size:1rem;">₦</span>
+                            <input type="number" id="amount" name="amount" class="form-input"
+                                placeholder="0.00" required min="100" step="0.01"
+                                style="padding-left:36px;"
+                                oninput="updatePreview(this.value)">
+                        </div>
+                        <div id="amount-preview" style="font-size:0.8rem; color:var(--accent); margin-top:6px; font-weight:600;"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="description">Payment Description</label>
+                        <input type="text" id="description" name="description" class="form-input"
+                            placeholder="e.g. Invoice #001, Product purchase..." maxlength="255"
+                            value="Payment">
+                    </div>
+
+                    <!-- Preview Card -->
+                    <div class="glass-card" style="padding:1rem; margin-bottom:1.5rem; border-color:rgba(108,71,255,0.3);">
+                        <div style="font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.75rem;">Payment Preview</div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-size:0.85rem; color:var(--text-secondary);">Merchant</div>
+                                <div style="font-weight:700;">{{ current_user.business_name }}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-size:0.85rem; color:var(--text-secondary);">Amount</div>
+                                <div id="preview-amount" style="font-weight:700; font-size:1.25rem;" class="text-accent">₦—</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="width:100%; justify-content:center; padding:14px;" id="submit-btn">
+                        <span id="submit-text">🚀 Generate Monnify Checkout</span>
+                        <span id="submit-spinner" class="spinner" style="display:none;"></span>
+                    </button>
+
+                    <p style="text-align:center; font-size:0.8rem; color:var(--text-muted); margin-top:1rem;">
+                        You'll be redirected to Monnify's secure checkout page
+                    </p>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function updatePreview(val) {
+    const num = parseFloat(val);
+    const preview = document.getElementById('preview-amount');
+    const label = document.getElementById('amount-preview');
+    if (!isNaN(num) && num > 0) {
+        const formatted = '₦' + num.toLocaleString('en-NG', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        preview.textContent = formatted;
+        label.textContent = formatted;
+    } else {
+        preview.textContent = '₦—';
+        label.textContent = '';
+    }
+}
+
+document.getElementById('payment-form').addEventListener('submit', function() {
+    document.getElementById('submit-text').style.display = 'none';
+    document.getElementById('submit-spinner').style.display = 'inline-block';
+});
+</script>
+{% endblock %}

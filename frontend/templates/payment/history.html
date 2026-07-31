@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% block title %}Payment History{% endblock %}
+
+{% block content %}
+<div class="app-layout">
+    <aside class="sidebar">
+        <a href="{{ url_for('dashboard.index') }}" class="sidebar-link"><span class="icon">🏠</span> Dashboard</a>
+        <a href="{{ url_for('payment.create') }}" class="sidebar-link"><span class="icon">➕</span> New Payment</a>
+        <a href="{{ url_for('payment.history') }}" class="sidebar-link active"><span class="icon">📋</span> Payment History</a>
+        <a href="{{ url_for('payment.simulate_webhook') }}" class="sidebar-link"><span class="icon">🧪</span> Dev Simulator</a>
+    </aside>
+
+    <main class="main-content">
+        <!-- Header -->
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+            <div>
+                <h1 style="font-size:1.6rem; font-weight:800; margin-bottom:4px;">Payment History</h1>
+                <p style="color:var(--text-secondary); font-size:0.9rem;">All transactions linked to your merchant account</p>
+            </div>
+            <a href="{{ url_for('payment.create') }}" class="btn-primary">➕ New Payment</a>
+        </div>
+
+        <!-- Filters -->
+        <div class="glass-card" style="padding:1rem 1.5rem; margin-bottom:1.5rem; display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
+            <span style="font-size:0.85rem; color:var(--text-muted); font-weight:600;">Filter:</span>
+            {% for s, label, cls in [('', 'All', 'badge-secondary'), ('PAID', 'Paid', 'badge-success'), ('PENDING', 'Pending', 'badge-warning'), ('FAILED', 'Failed', 'badge-danger')] %}
+            <a href="{{ url_for('payment.history', status=s) }}"
+               class="badge {{ cls }}"
+               style="text-decoration:none; cursor:pointer; {{ 'box-shadow:0 0 0 2px var(--primary);' if status_filter == s }}">
+               {{ label }}
+            </a>
+            {% endfor %}
+        </div>
+
+        <!-- Table -->
+        <div class="glass-card" style="overflow:hidden;">
+            {% if payments.items %}
+            <div style="overflow-x:auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Reference</th>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in payments.items %}
+                        <tr>
+                            <td>
+                                <div style="font-family:monospace; font-size:0.8rem; color:var(--text-primary); cursor:pointer;"
+                                     onclick="copyRef('{{ p.payment_reference }}')"
+                                     title="Click to copy">
+                                    {{ p.payment_reference[-16:] }}
+                                    <span style="margin-left:4px; opacity:0.5;">📋</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="font-weight:500; color:var(--text-primary);">{{ p.customer_name or '—' }}</div>
+                                <div style="font-size:0.75rem; color:var(--text-muted);">{{ p.customer_email or '' }}</div>
+                            </td>
+                            <td style="font-weight:700; color:var(--accent);">{{ format_currency(p.amount) }}</td>
+                            <td>
+                                <span class="badge {{ 'badge-success' if p.status == 'PAID' else ('badge-warning' if p.status == 'PENDING' else 'badge-danger') }}">
+                                    {{ '✅' if p.status == 'PAID' else ('⏳' if p.status == 'PENDING' else '❌') }}
+                                    {{ p.status }}
+                                </span>
+                            </td>
+                            <td style="color:var(--text-muted); font-size:0.85rem;">{{ format_datetime(p.created_at) }}</td>
+                            <td>
+                                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                                    <a href="{{ url_for('payment.verify_now', reference=p.payment_reference) }}"
+                                       class="btn-ghost btn-sm" title="Re-verify from Monnify">🔍 Verify</a>
+                                    <a href="{{ url_for('payment.download_qr', reference=p.payment_reference) }}"
+                                       class="btn-ghost btn-sm" title="Download QR Code">📱 QR</a>
+                                    <a href="{{ url_for('payment.audit_log', reference=p.payment_reference) }}"
+                                       class="btn-ghost btn-sm" title="View audit trail">📜 Log</a>
+                                    <a href="{{ url_for('verify.verify_payment', reference=p.payment_reference) }}"
+                                       class="btn-ghost btn-sm" target="_blank" title="Open verification page">🔗</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if payments.pages > 1 %}
+            <div style="padding:1rem; border-top:1px solid var(--card-border);">
+                <div class="pagination">
+                    {% if payments.has_prev %}
+                    <a href="{{ url_for('payment.history', page=payments.prev_num, status=status_filter) }}" class="page-link">← Prev</a>
+                    {% endif %}
+                    {% for p_num in payments.iter_pages() %}
+                        {% if p_num %}
+                        <a href="{{ url_for('payment.history', page=p_num, status=status_filter) }}"
+                           class="page-link {{ 'active' if p_num == payments.page }}">{{ p_num }}</a>
+                        {% else %}
+                        <span class="page-link" style="opacity:0.4;">...</span>
+                        {% endif %}
+                    {% endfor %}
+                    {% if payments.has_next %}
+                    <a href="{{ url_for('payment.history', page=payments.next_num, status=status_filter) }}" class="page-link">Next →</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div style="padding:4rem; text-align:center; color:var(--text-muted);">
+                <div style="font-size:3rem; margin-bottom:1rem;">📭</div>
+                <div style="font-size:1rem; font-weight:600; margin-bottom:0.5rem;">No payments found</div>
+                <p style="font-size:0.9rem;">
+                    {% if status_filter %}
+                        No {{ status_filter }} payments.
+                        <a href="{{ url_for('payment.history') }}" class="text-primary-color">View all payments</a>
+                    {% else %}
+                        <a href="{{ url_for('payment.create') }}" class="text-primary-color">Create your first payment →</a>
+                    {% endif %}
+                </p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Copy toast -->
+        <div id="copy-toast" style="position:fixed; bottom:2rem; right:2rem; background:var(--surface); border:1px solid var(--card-border); border-radius:10px; padding:12px 20px; font-size:0.9rem; font-weight:600; display:none; z-index:999; color:var(--accent);">
+            ✅ Reference copied!
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function copyRef(ref) {
+    navigator.clipboard.writeText(ref).then(() => {
+        const toast = document.getElementById('copy-toast');
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 2000);
+    });
+}
+</script>
+{% endblock %}
