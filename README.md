@@ -40,12 +40,6 @@ cp .env.example .env
 
 Edit `.env` and add your Monnify credentials:
 
-```
-MONNIFY_API_KEY=MK_TEST_VAXBHVL9W2
-MONNIFY_SECRET_KEY=DQZRCKYX8EPV9X25LV5Y7DL8KULV0FAR
-MONNIFY_CONTRACT_CODE=0175904349
-MONNIFY_BASE_URL=https://sandbox.monnify.com
-```
 
 ### 5. Run the server
 
